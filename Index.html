@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Partner Intake & Management Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fef2f2',
+                            100: '#ffe4e6',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen flex flex-col bg-slate-50">
+
+    <header class="bg-black border-b border-zinc-800 sticky top-0 z-30 shadow-md text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between py-3 md:h-16 gap-3">
+                <div class="flex items-center space-x-3 shrink-0">
+                    <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-red-600/40">
+                        <i class="fa-solid fa-rocket animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black tracking-wide text-white text-lg leading-tight uppercase flex items-center gap-1.5">
+                            Community Partner <span class="text-red-500">Launchpad</span>
+                        </h1>
+                        <p class="text-xs text-zinc-400">Career-Connected Education & Intake Network</p>
+                    </div>
+                </div>
+
+                <nav class="flex items-center space-x-1 sm:space-x-2 bg-zinc-900 p-1.5 rounded-xl border border-zinc-800 overflow-x-auto custom-scrollbar">
+                    <button id="tab-form" onclick="switchTab('form')" class="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all text-white flex items-center gap-2 bg-red-600 shadow-sm shrink-0">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>Partner Intake Form</span>
+                    </button>
+                    
+                    <button id="tab-dashboard" onclick="switchTab('dashboard')" class="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all text-zinc-300 hover:text-white flex items-center gap-2 shrink-0">
+                        <i class="fa-solid fa-chart-pie text-red-500"></i>
+                        <span>Directory & Trends</span>
+                        <span id="partner-count-badge" class="ml-1 bg-red-950 text-red-400 border border-red-800 text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                    </button>
+
+                    <button id="tab-sync" onclick="switchTab('sync')" class="px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all text-zinc-300 hover:text-white flex items-center gap-2 shrink-0 border border-zinc-700 bg-zinc-800 hover:bg-zinc-700">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-base"></i>
+                        <span class="font-bold text-zinc-100">Google Sheet Sync</span>
+                        <span id="sync-status-indicator" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <section id="view-form" class="space-y-6">
+            <div class="bg-gradient-to-r from-black via-zinc-900 to-red-950 rounded-2xl p-6 sm:p-8 text-white shadow-2xl border border-zinc-800 relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-10 opacity-20 text-red-500 text-[180px] pointer-events-none transform -rotate-12">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+                <div class="max-w-2xl relative z-10">
+                    <span class="inline-flex items-center gap-1.5 bg-red-600/30 text-red-300 border border-red-500/40 backdrop-blur-md text-xs font-semibold px-3.5 py-1.5 rounded-full mb-3 leading-normal">
+                        <i class="fa-solid fa-fire text-red-500"></i> Helping students make informed decisions about their futures through supported career exposure and exploration!
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight">Community Partner Intake</h2>
+                    <p class="mt-2 text-zinc-300 text-sm sm:text-base leading-relaxed font-normal">
+                        Fuel student potential and launch impactful workforce partnerships. Complete this form to host interns, mentor students, or join pathway advisory boards.
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-2 text-xs">
+                        <button type="button" onclick="fillDemoData()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl border border-red-500/50 shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fill Sample Partner Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="partner-intake-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+
+                <!-- SECTION 1 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                        <div class="w-8 h-8 rounded-lg bg-black text-red-500 flex items-center justify-center font-black text-sm">1</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-black">Organization & Primary Contact</h3>
+                            <p class="text-xs text-slate-500">Provide basic details about your company and key contact person</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Organization Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="organizationName" required placeholder="e.g. Apex Health Systems" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Industry Sector <span class="text-red-500">*</span></label>
+                            <select name="industrySector" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition bg-white">
+                                <option value="">Select Industry...</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Education">Education</option>
+                                <option value="Manufacturing">Manufacturing</option>
+                                <option value="Non-Profit">Non-Profit</option>
+                                <option value="Arts & Entertainment">Arts & Entertainment</option>
+                                <option value="Trades & Construction">Trades & Construction</option>
+                                <option value="Government & Public Services">Government & Public Services</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contact Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="contactName" required placeholder="e.g. Maria Gonzalez" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Contact Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="contactEmail" required placeholder="m.gonzalez@apexhealth.org" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Job Title / Role</label>
+                            <input type="text" name="jobTitle" placeholder="e.g. Workforce Development Specialist" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Phone Number</label>
+                            <input type="tel" name="phoneNumber" placeholder="(555) 123-4567" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Company Website</label>
+                            <input type="url" name="companyWebsite" placeholder="https://www.apexhealth.org" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Physical Address / Location</label>
+                            <input type="text" name="physicalAddress" placeholder="e.g. 100 Medical Center Way, Suite 300" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-100 text-black flex items-center justify-center font-black text-sm">2</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-black">Alternate Contact (Optional)</h3>
+                            <p class="text-xs text-slate-500">Secondary colleague for scheduling backups</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Alternate Contact Name</label>
+                            <input type="text" name="alternateContactName" placeholder="e.g. David Ross" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Alternate Contact Email</label>
+                            <input type="email" name="alternateContactEmail" placeholder="d.ross@apexhealth.org" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 3 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                        <div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-black text-sm">3</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-black">In what ways are you available to collaborate? <span class="text-red-500">*</span></h3>
+                            <p class="text-xs text-slate-500">Select all career-connected learning opportunities your team can offer</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Career Day" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Career Day</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Participate in a morning of short 20 minute sessions with 10th graders to showcase your day-to-day experiences in your current career. Students will self-select into your session to learn about your role.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time Commitment: 1 morning in January.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Career-Connected Mentoring" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Career-connected mentoring</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Support students through lightly facilitated mentoring 1:1 or with a small group. Could be one session or a few meetings over a short period of time.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time commitment: 1-3 hours over 1 month in Spring.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Speaker Spotlight" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Speaker Spotlight</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Join us at school or zoom in to a class/club/opt-in flex block session featuring a 30 minute talk about your career journey and your current role. Focus on key decisions made in your career path.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time Commitment: 30 minute call to align on messaging and then the 30 minute live talk, will work around your schedule.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Workplace / Facility Tour" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Workplace/Facility Tour</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Host a student site visit, chaperoned by RMHS staff.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time Commitment: Planning meeting and host the tour (1.5 hour tours are usually what we aim for).</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Host an Intern" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Host an Intern</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Host a RMHS senior as they learn on the job at an internship. Students choose internships based on their interests and career goals. Internships can be paid or unpaid. Students are evaluated based on the development of chosen durable skills.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time commitment: Meeting with RMHS Internship Coordinator and student to align on expectations. Regular check-in meetings with student intern to provide feedback and support and (Optional) attendance at internship fair and internship showcase.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Job Shadow" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Job Shadow</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">Host a student at your workplace for an observational visit to experience day-to-day operations and career pathways in action.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time Commitment: Half-day or 1-day workplace observation visit.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Mentor a student while they complete a capstone" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Mentor a student while they complete a capstone</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">guide and advise a student working on a semester long capstone project for your company/organization. They can solve the 10th thing on your to-do list that never seems to get done!</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time Commitment: 1 hour orientation meeting and then weekly check-in meetings with student throughout semester to discuss progress toward benchmarks. Attendance at final presentation.</span>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start p-4 rounded-xl border border-slate-200 hover:border-red-500 hover:bg-slate-50 transition cursor-pointer group relative">
+                            <input type="checkbox" name="collaborationTypes" value="Innovation Career Pathway Advisory Board Member" class="mt-1 w-4 h-4 text-red-600 rounded border-slate-300 focus:ring-red-500 shrink-0">
+                            <div class="ml-3 space-y-1">
+                                <span class="block text-sm font-bold text-slate-900 group-hover:text-red-600">Innovation Career Pathway Advisory Board Member</span>
+                                <p class="text-xs text-slate-600 leading-relaxed">as a member of the workforce in the following industries (Careers in Allied Health, Public Health, Engineering/Advanced Manufacturing, Clean Energy, Computer Science, Digital Media, or Business) you will participate in short quarterly meetings with career pathway teachers to help guide curriculum and ensure students in our programs are graduating with the technical and durable skills to allow them to be competitive in the field and ensure alignment with industry standards.</p>
+                                <span class="inline-block text-[11px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100"><i class="fa-regular fa-clock mr-1"></i> Time commitment: 60 minute quarterly meetings facilitated by RMHS Director of Academic Achievement</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- SECTION 4 -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-800 text-white flex items-center justify-center font-bold text-sm">4</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Format & Age Requirements</h3>
+                            <p class="text-xs text-slate-500">Specify interaction methods and student age criteria</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Preferred Interaction Format <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 p-2.5 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                    <input type="checkbox" name="interactionFormats" value="In-Person (School/Campus)" class="rounded text-brand-600"> In-Person (School/Campus)
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 p-2.5 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                    <input type="checkbox" name="interactionFormats" value="On-Site (Company)" class="rounded text-brand-600"> On-Site (Company)
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 p-2.5 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                    <input type="checkbox" name="interactionFormats" value="Virtual / Remote" class="rounded text-brand-600"> Virtual / Remote
+                                </label>
+                                <label class="flex items-center gap-2 text-xs font-medium text-slate-700 p-2.5 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                    <input type="checkbox" name="interactionFormats" value="Hybrid" class="rounded text-brand-600"> Hybrid
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Minimum Age Requirement <span class="text-red-500">*</span></label>
+                            <select name="minAge" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition bg-white">
+                                <option value="None">None (All grade levels eligible)</option>
+                                <option value="16+">16+ Years Old</option>
+                                <option value="18+">18+ Years Old</option>
+                            </select>
+                            <p class="text-[11px] text-slate-500 mt-2">
+                                Helps match your opportunities with appropriate high school grade levels (e.g. 16+ for lab/light manufacturing, 18+ for adult healthcare facilities).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-black text-white p-6 rounded-2xl border border-zinc-800 shadow-xl">
+                    <p class="text-xs text-zinc-400">
+                        Submitting records your intake and syncs directly with your Google Sheet database.
+                    </p>
+                    <div class="flex gap-3 w-full sm:w-auto">
+                        <button type="button" onclick="document.getElementById('partner-intake-form').reset()" class="w-1/2 sm:w-auto px-5 py-3 text-sm font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition">
+                            Reset Form
+                        </button>
+                        <button type="submit" class="w-1/2 sm:w-auto px-8 py-3 text-sm font-black text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-lg shadow-red-600/40 transition flex items-center justify-center gap-2 uppercase tracking-wide">
+                            <i class="fa-solid fa-rocket"></i> Launch Partnership
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </section>
+
+        <section id="view-dashboard" class="space-y-6 hidden">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 border-l-4 border-l-black">
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 text-black flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Total Partners</p>
+                        <h3 id="stat-total" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 border-l-4 border-l-red-600">
+                    <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Internships Offered</p>
+                        <h3 id="stat-internships" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 border-l-4 border-l-zinc-800">
+                    <div class="w-12 h-12 rounded-xl bg-zinc-100 text-zinc-900 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Speakers & Mentors</p>
+                        <h3 id="stat-speakers" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-center gap-4 border-l-4 border-l-red-800">
+                    <div class="w-12 h-12 rounded-xl bg-red-100 text-red-800 flex items-center justify-center text-xl font-bold">
+                        <i class="fa-solid fa-people-roof"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase font-semibold">Advisory Board Members</p>
+                        <h3 id="stat-advisors" class="text-2xl font-black text-slate-900">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-col lg:flex-row gap-3 justify-between items-center">
+                    <div class="relative w-full lg:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="search-input" oninput="renderPartnerCards()" placeholder="Search partner, contact, sector..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-red-500 outline-none">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <select id="filter-sector" onchange="renderPartnerCards()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                            <option value="ALL">All Sectors</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Education">Education</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Non-Profit">Non-Profit</option>
+                            <option value="Arts & Entertainment">Arts & Entertainment</option>
+                            <option value="Trades & Construction">Trades & Construction</option>
+                            <option value="Government & Public Services">Government</option>
+                        </select>
+
+                        <select id="filter-collab" onchange="renderPartnerCards()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                            <option value="ALL">All Collaboration Types</option>
+                            <option value="Career Day">Career Day</option>
+                            <option value="Career-Connected Mentoring">Career-Connected Mentoring</option>
+                            <option value="Speaker Spotlight">Speaker Spotlight</option>
+                            <option value="Workplace / Facility Tour">Workplace/Facility Tour</option>
+                            <option value="Host an Intern">Host an Intern</option>
+                            <option value="Job Shadow">Job Shadow</option>
+                            <option value="Mentor a student while they complete a capstone">Capstone Mentor</option>
+                            <option value="Innovation Career Pathway Advisory Board Member">Advisory Board</option>
+                        </select>
+
+                        <select id="sort-order" onchange="renderPartnerCards()" class="px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                            <option value="NEWEST">Sort: Newest First</option>
+                            <option value="OLDEST">Sort: Oldest First</option>
+                            <option value="NAME_ASC">Sort: Name (A-Z)</option>
+                            <option value="NAME_DESC">Sort: Name (Z-A)</option>
+                        </select>
+
+                        <button onclick="pullDataFromGoogleSheet()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-arrows-rotate"></i> Sync from Sheet
+                        </button>
+
+                        <button onclick="exportToCSV()" class="px-3.5 py-2 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-file-csv"></i> CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="partner-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic cards render here -->
+            </div>
+        </section>
+
+        <section id="view-sync" class="space-y-6 hidden">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+                <div class="flex items-center gap-4 border-b border-slate-100 pb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Google Sheets Direct Sync Configuration</h2>
+                        <p class="text-xs text-slate-500">Connect your front-end web app to push submissions and pull real-time partner records from Google Sheets.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-200">
+                            <h4 class="font-bold text-emerald-900 text-sm flex items-center gap-2 mb-1">
+                                <i class="fa-solid fa-link"></i> Web App Endpoint URL
+                            </h4>
+                            <p class="text-xs text-emerald-800 leading-relaxed mb-3">
+                                Paste the Web App URL generated after deploying your Google Apps Script (`Code.gs`) below:
+                            </p>
+                            <input type="url" id="webhook-url-input" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                            
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button onclick="saveWebhookUrl()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save Webhook URL
+                                </button>
+                                <button onclick="pullDataFromGoogleSheet()" class="px-4 py-2 bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-100 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-cloud-arrow-down"></i> Pull Data Now
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                            <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Features Enabled with Sheet Integration:</h4>
+                            <ul class="text-xs text-slate-600 space-y-1.5">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Automatic pushing of intake form responses to Google Sheet rows.</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Automatic timestamping in dedicated Date Submitted column.</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Bidirectional pulling of all partner submissions back into the directory.</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> CSV report downloads for offline reporting.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 text-slate-200 p-6 rounded-2xl text-xs space-y-3 font-mono leading-relaxed shadow-lg">
+                        <h4 class="text-sm font-bold text-emerald-400 font-sans flex items-center gap-2 border-b border-slate-800 pb-2">
+                            <i class="fa-solid fa-terminal"></i> 2-Minute Google Sheet Setup
+                        </h4>
+                        <ol class="list-decimal pl-4 space-y-2.5 text-slate-300">
+                            <li>Create or open your target Google Sheet.</li>
+                            <li>In the top menu, click <strong>Extensions &gt; Apps Script</strong>.</li>
+                            <li>Copy and paste all contents from <code class="text-emerald-300">Code.gs</code> into the editor.</li>
+                            <li>Click <strong>Deploy &gt; New deployment</strong>.</li>
+                            <li>Select type: <strong>Web app</strong>.</li>
+                            <li>Set "Execute as": <strong>Me</strong>.</li>
+                            <li>Set "Who has access": <strong>Anyone</strong>.</li>
+                            <li>Click <strong>Deploy</strong>, grant permissions, and paste the Web App URL in the input field!</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="partner-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 space-y-6 custom-scrollbar">
+            <div class="flex justify-between items-start border-b pb-4">
+                <div>
+                    <span id="modal-sector" class="text-[10px] font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Industry</span>
+                    <h3 id="modal-org-name" class="text-2xl font-extrabold text-slate-900 mt-1">Organization Name</h3>
+                    <p id="modal-contact-line" class="text-xs text-slate-500 mt-1">Contact Name • Email</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold px-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="modal-body-content" class="space-y-4 text-xs">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div class="border-t pt-4 flex justify-end">
+                <button onclick="closeModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'community_partners_data_v2';
+        const WEBHOOK_KEY = 'community_partners_webhook_url';
+        
+        let partners = [];
+        let webhookUrl = localStorage.getItem(WEBHOOK_KEY) || '';
+
+        const samplePartners = [
+            {
+                id: '1',
+                organizationName: 'Apex Health Systems',
+                contactName: 'Maria Gonzalez',
+                contactEmail: 'm.gonzalez@apexhealth.org',
+                jobTitle: 'Workforce Development Director',
+                phoneNumber: '(555) 123-4567',
+                industrySector: 'Healthcare',
+                companyWebsite: 'https://apexhealth.example.org',
+                physicalAddress: '100 Medical Center Way, Suite 300',
+                alternateContactName: 'David Ross',
+                alternateContactEmail: 'd.ross@apexhealth.org',
+                collaborationTypes: ['Host an Intern', 'Speaker Spotlight', 'Innovation Career Pathway Advisory Board Member'],
+                interactionFormats: ['In-Person (School/Campus)', 'On-Site (Company)'],
+                minAge: '16+',
+                submittedAt: new Date().toLocaleDateString()
+            },
+            {
+                id: '2',
+                organizationName: 'Nexus Tech Innovations',
+                contactName: 'Alex Rivera',
+                contactEmail: 'a.rivera@nexustech.io',
+                jobTitle: 'Senior Software Architect',
+                phoneNumber: '(555) 987-6543',
+                industrySector: 'Technology',
+                companyWebsite: 'https://nexustech.example.io',
+                physicalAddress: '400 Innovation Drive',
+                alternateContactName: 'Samantha Wu',
+                alternateContactEmail: 's.wu@nexustech.io',
+                collaborationTypes: ['Career Day', 'Job Shadow', 'Career-Connected Mentoring', 'Mentor a student while they complete a capstone'],
+                interactionFormats: ['Hybrid', 'Virtual / Remote'],
+                minAge: 'None',
+                submittedAt: new Date().toLocaleDateString()
+            }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    partners = JSON.parse(stored);
+                } catch (e) {
+                    partners = [...samplePartners];
+                }
+            } else {
+                partners = [...samplePartners];
+                saveToStorage();
+            }
+
+            if (webhookUrl) {
+                const input = document.getElementById('webhook-url-input');
+                if (input) input.value = webhookUrl;
+                updateSyncIndicator('connected');
+                pullDataFromGoogleSheet(true);
+            } else {
+                updateSyncIndicator('disconnected');
+            }
+
+            updateStats();
+            renderPartnerCards();
+        });
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(partners));
+            updateStats();
+        }
+
+        function updateSyncIndicator(status) {
+            const indicator = document.getElementById('sync-status-indicator');
+            if (!indicator) return;
+            if (status === 'connected') {
+                indicator.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+            } else if (status === 'syncing') {
+                indicator.className = 'w-2 h-2 rounded-full bg-blue-500 animate-ping';
+            } else {
+                indicator.className = 'w-2 h-2 rounded-full bg-amber-500';
+            }
+        }
+
+        function switchTab(tabName) {
+            ['form', 'dashboard', 'sync'].forEach(tab => {
+                const view = document.getElementById(`view-${tab}`);
+                const btn = document.getElementById(`tab-${tab}`);
+                if (tab === tabName) {
+                    view.classList.remove('hidden');
+                    btn.classList.add('bg-red-600', 'shadow-sm', 'text-white');
+                    btn.classList.remove('text-zinc-300', 'text-slate-600');
+                } else {
+                    view.classList.add('hidden');
+                    btn.classList.remove('bg-red-600', 'shadow-sm', 'text-white');
+                    btn.classList.add('text-zinc-300');
+                }
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+
+            const newPartner = {
+                id: Date.now().toString(),
+                organizationName: formData.get('organizationName'),
+                contactName: formData.get('contactName'),
+                contactEmail: formData.get('contactEmail'),
+                jobTitle: formData.get('jobTitle') || 'N/A',
+                phoneNumber: formData.get('phoneNumber') || 'N/A',
+                industrySector: formData.get('industrySector'),
+                companyWebsite: formData.get('companyWebsite') || '',
+                physicalAddress: formData.get('physicalAddress') || '',
+                alternateContactName: formData.get('alternateContactName') || '',
+                alternateContactEmail: formData.get('alternateContactEmail') || '',
+                collaborationTypes: formData.getAll('collaborationTypes'),
+                interactionFormats: formData.getAll('interactionFormats'),
+                minAge: formData.get('minAge') || 'None',
+                submittedAt: new Date().toLocaleDateString()
+            };
+
+            partners.unshift(newPartner);
+            saveToStorage();
+            renderPartnerCards();
+
+            if (webhookUrl) {
+                pushToWebhook(newPartner);
+            }
+
+            showToast('Partner registration submitted successfully!', 'success');
+            form.reset();
+            switchTab('dashboard');
+        }
+
+        function fillDemoData() {
+            const form = document.getElementById('partner-intake-form');
+            form.organizationName.value = "Beacon Financial Advisory Group";
+            form.industrySector.value = "Finance";
+            form.contactName.value = "Robert Vance";
+            form.contactEmail.value = "r.vance@beaconfinance.com";
+            form.jobTitle.value = "Head of Community Relations";
+            form.phoneNumber.value = "(555) 456-7890";
+            form.companyWebsite.value = "https://beaconfinance.example.com";
+            form.physicalAddress.value = "500 Capital Avenue, Floor 10";
+            form.alternateContactName.value = "Claire Bennett";
+            form.alternateContactEmail.value = "c.bennett@beaconfinance.com";
+            form.minAge.value = "16+";
+
+            const collabs = form.querySelectorAll('input[name="collaborationTypes"]');
+            collabs.forEach(cb => {
+                if (['Career Day', 'Mentor a student while they complete a capstone', 'Innovation Career Pathway Advisory Board Member'].includes(cb.value)) {
+                    cb.checked = true;
+                }
+            });
+
+            const formats = form.querySelectorAll('input[name="interactionFormats"]');
+            formats.forEach(cb => {
+                if (['In-Person (School/Campus)', 'Hybrid'].includes(cb.value)) {
+                    cb.checked = true;
+                }
+            });
+
+            showToast('Sample partner data auto-filled!', 'info');
+        }
+
+        function updateStats() {
+            document.getElementById('partner-count-badge').textContent = partners.length;
+            document.getElementById('stat-total').textContent = partners.length;
+
+            let internships = 0, speakers = 0, advisors = 0;
+            partners.forEach(p => {
+                const types = p.collaborationTypes || [];
+                if (types.some(t => t.includes('Intern'))) internships++;
+                if (types.some(t => t.includes('Speaker') || t.includes('Mentoring') || t.includes('capstone'))) speakers++;
+                if (types.some(t => t.includes('Advisory Board'))) advisors++;
+            });
+
+            document.getElementById('stat-internships').textContent = internships;
+            document.getElementById('stat-speakers').textContent = speakers;
+            document.getElementById('stat-advisors').textContent = advisors;
+        }
+
+        function renderPartnerCards() {
+            const grid = document.getElementById('partner-cards-grid');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const sectorFilter = document.getElementById('filter-sector').value;
+            const collabFilter = document.getElementById('filter-collab').value;
+            const sortOrder = document.getElementById('sort-order').value;
+
+            let filtered = partners.filter(p => {
+                const matchesSearch = (p.organizationName || '').toLowerCase().includes(search) ||
+                                      (p.contactName || '').toLowerCase().includes(search) ||
+                                      (p.industrySector || '').toLowerCase().includes(search);
+                const matchesSector = sectorFilter === 'ALL' || p.industrySector === sectorFilter;
+                const matchesCollab = collabFilter === 'ALL' || (p.collaborationTypes || []).includes(collabFilter);
+
+                return matchesSearch && matchesSector && matchesCollab;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortOrder === 'NAME_ASC') return (a.organizationName || '').localeCompare(b.organizationName || '');
+                if (sortOrder === 'NAME_DESC') return (b.organizationName || '').localeCompare(a.organizationName || '');
+                if (sortOrder === 'OLDEST') return (a.id || 0) - (b.id || 0);
+                return (b.id || 0) - (a.id || 0);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center">
+                        <i class="fa-solid fa-rocket text-4xl text-slate-300 mb-3"></i>
+                        <h4 class="font-bold text-slate-700 text-sm">No partner records found</h4>
+                        <p class="text-xs text-slate-500 mt-1">Try adjusting your filters or submit a new partner registration.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-lg hover:border-red-200 transition flex flex-col justify-between group">
+                    <div>
+                        <div class="flex justify-between items-start gap-2 mb-2">
+                            <span class="text-[10px] font-black text-white bg-black px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
+                                <i class="fa-solid fa-rocket text-red-500 text-[9px]"></i> ${p.industrySector || 'General'}
+                            </span>
+                            <span class="text-[10px] bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded font-mono font-bold">Age: ${p.minAge || 'None'}</span>
+                        </div>
+
+                        <h3 class="font-black text-slate-900 text-base leading-snug group-hover:text-red-600 transition-colors">${p.organizationName}</h3>
+                        <p class="text-xs text-slate-600 mt-1 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-user text-slate-400 text-[10px]"></i> ${p.contactName} 
+                            ${p.jobTitle && p.jobTitle !== 'N/A' ? `<span class="text-slate-400">(${p.jobTitle})</span>` : ''}
+                        </p>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">
+                            <i class="fa-solid fa-envelope text-slate-400 text-[10px]"></i> ${p.contactEmail}
+                        </p>
+
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1.5">Available Opportunities:</span>
+                            <div class="flex flex-wrap gap-1">
+                                ${(p.collaborationTypes || []).map(c => `
+                                    <span class="text-[10px] bg-slate-100 text-slate-900 border border-slate-200 px-2 py-0.5 rounded-md font-semibold">
+                                        ${c}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <span class="text-[10px] text-slate-400">
+                            Submitted: ${p.submittedAt || 'N/A'}
+                        </span>
+                        <button onclick="openModal('${p.id}')" class="text-xs font-extrabold text-red-600 hover:text-black flex items-center gap-1 transition-colors">
+                            Details <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) {
+            const p = partners.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('modal-sector').textContent = p.industrySector || 'Industry';
+            document.getElementById('modal-org-name').textContent = p.organizationName;
+            document.getElementById('modal-contact-line').textContent = `${p.contactName} (${p.jobTitle || 'N/A'}) • ${p.contactEmail} • ${p.phoneNumber || 'No Phone'}`;
+
+            const body = document.getElementById('modal-body-content');
+            body.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div><strong>Submitted Date:</strong> ${p.submittedAt || 'N/A'}</div>
+                    <div><strong>Website:</strong> ${p.companyWebsite ? `<a href="${p.companyWebsite}" target="_blank" class="text-brand-600 underline">${p.companyWebsite}</a>` : 'N/A'}</div>
+                    <div><strong>Address:</strong> ${p.physicalAddress || 'N/A'}</div>
+                    <div><strong>Alternate Contact:</strong> ${p.alternateContactName ? `${p.alternateContactName} (${p.alternateContactEmail})` : 'None'}</div>
+                    <div><strong>Minimum Age:</strong> ${p.minAge || 'None'}</div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 text-xs uppercase mb-1">Collaboration Models Offered:</h4>
+                    <div class="flex flex-wrap gap-1">
+                        ${(p.collaborationTypes || []).map(c => `<span class="bg-brand-100 text-brand-800 px-2.5 py-1 rounded-lg text-xs font-semibold">${c}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-800 text-xs uppercase mb-1">Preferred Formats:</h4>
+                    <div class="flex flex-wrap gap-1">
+                        ${(p.interactionFormats || []).map(f => `<span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-medium">${f}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('partner-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('partner-modal').classList.add('hidden');
+        }
+
+        function saveWebhookUrl() {
+            const input = document.getElementById('webhook-url-input');
+            webhookUrl = input.value.trim();
+            localStorage.setItem(WEBHOOK_KEY, webhookUrl);
+            updateSyncIndicator(webhookUrl ? 'connected' : 'disconnected');
+            showToast('Google Sheet Web App URL saved!', 'success');
+        }
+
+        function pushToWebhook(partnerData) {
+            if (!webhookUrl) return;
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(partnerData)
+            })
+            .then(() => {
+                showToast('Pushed intake data to Google Sheet!', 'success');
+            })
+            .catch(() => {
+                showToast('Sync push error. Check script deployment permissions.', 'error');
+            });
+        }
+
+        function pullDataFromGoogleSheet(silent = false) {
+            if (!webhookUrl) {
+                if (!silent) showToast('Please enter and save your Google Apps Script Web App URL first.', 'error');
+                return;
+            }
+
+            updateSyncIndicator('syncing');
+
+            fetch(webhookUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    partners = data;
+                    saveToStorage();
+                    renderPartnerCards();
+                    updateSyncIndicator('connected');
+                    if (!silent) showToast(`Successfully pulled ${data.length} partner records from Google Sheet!`, 'success');
+                } else if (data.status === 'active') {
+                    if (!silent) showToast('Webhook endpoint active. Submit an entry or redeploy script to read existing rows.', 'info');
+                    updateSyncIndicator('connected');
+                } else {
+                    updateSyncIndicator('connected');
+                }
+            })
+            .catch(err => {
+                updateSyncIndicator('connected');
+                if (!silent) showToast('Could not pull data from Google Sheet. Ensure Web App access is set to "Anyone".', 'error');
+            });
+        }
+
+        function exportToCSV() {
+            if (partners.length === 0) {
+                showToast('No partner data available to export.', 'error');
+                return;
+            }
+
+            const headers = [
+                'Date Submitted', 'Organization Name', 'Contact Name', 'Contact Email', 'Job Title', 'Phone Number',
+                'Industry Sector', 'Company Website', 'Physical Address', 'Alternate Contact Name',
+                'Alternate Contact Email', 'Collaboration Ways', 'Interaction Formats', 'Minimum Age'
+            ];
+
+            const rows = partners.map(p => [
+                `"${(p.submittedAt || '').replace(/"/g, '""')}"`,
+                `"${(p.organizationName || '').replace(/"/g, '""')}"`,
+                `"${(p.contactName || '').replace(/"/g, '""')}"`,
+                `"${(p.contactEmail || '').replace(/"/g, '""')}"`,
+                `"${(p.jobTitle || '').replace(/"/g, '""')}"`,
+                `"${(p.phoneNumber || '').replace(/"/g, '""')}"`,
+                `"${(p.industrySector || '').replace(/"/g, '""')}"`,
+                `"${(p.companyWebsite || '').replace(/"/g, '""')}"`,
+                `"${(p.physicalAddress || '').replace(/"/g, '""')}"`,
+                `"${(p.alternateContactName || '').replace(/"/g, '""')}"`,
+                `"${(p.alternateContactEmail || '').replace(/"/g, '""')}"`,
+                `"${(p.collaborationTypes || []).join('; ')}"`,
+                `"${(p.interactionFormats || []).join('; ')}"`,
+                `"${p.minAge || 'None'}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', `Community_Partners_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('CSV file downloaded successfully!', 'success');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-slate-900 text-white';
+            if (type === 'success') bgClass = 'bg-emerald-600 text-white shadow-emerald-500/20';
+            if (type === 'error') bgClass = 'bg-red-600 text-white shadow-red-500/20';
+
+            toast.className = `px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info')}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>

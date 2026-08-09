@@ -61,6 +61,7 @@
 
             <form id="partnerForm" class="space-y-10">
                 
+                <!-- Primary Contact Information Block -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <div class="flex items-center mb-6">
                         <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mr-3 font-bold">
@@ -88,6 +89,7 @@
                     </div>
                 </div>
 
+                <!-- Organization Profile Block -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <div class="flex items-center mb-6">
                         <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mr-3 font-bold">
@@ -157,11 +159,11 @@
                                     <i class="fa-solid fa-bullhorn text-slate-400 group-hover:text-red-600 transition"></i>
                                 </div>
                                 <p class="text-xs text-slate-500 mb-4 leading-relaxed">Become part of an important RMHS tradition where local professionals volunteer to share their career journey with 11th high school students.</p>
-                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: four consecutive 20-minute sessions for 11th grade students</div>
+                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: four consecutive 20-minute sessions for 11th grade students who select to learn about your industry</div>
                             </div>
                         </label>
 
-                        <!-- Job Shadow -->
+                        <!-- Job Shadow Day -->
                         <label class="relative cursor-pointer group">
                             <input type="checkbox" name="type" value="Job Shadow Day" class="hidden card-checkbox">
                             <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
@@ -174,7 +176,7 @@
                             </div>
                         </label>
 
-                        <!-- Internship -->
+                        <!-- Host Senior Intern -->
                         <label class="relative cursor-pointer group">
                             <input type="checkbox" name="type" value="Senior Internship" class="hidden card-checkbox">
                             <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
@@ -187,7 +189,7 @@
                             </div>
                         </label>
 
-                        <!-- Capstone -->
+                        <!-- Capstone Project Host -->
                         <label class="relative cursor-pointer group">
                             <input type="checkbox" name="type" value="Capstone Host" class="hidden card-checkbox">
                             <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
@@ -200,7 +202,7 @@
                             </div>
                         </label>
 
-                        <!-- Other Option -->
+                        <!-- Other Collaboration -->
                         <label class="relative cursor-pointer group">
                             <input type="checkbox" name="type" value="Other Collaboration" class="hidden card-checkbox">
                             <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
@@ -213,16 +215,16 @@
                             </div>
                         </label>
 
-                        <!-- Advisory Board -->
+                        <!-- Advisory Board Member -->
                         <label class="relative cursor-pointer group md:col-span-2">
                             <input type="checkbox" name="type" value="Advisory Board Member" class="hidden card-checkbox">
                             <div class="card-content p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-bold text-slate-900">Become an Innovation Career Pathways Advisory Board Member</h4>
+                                    <h4 class="font-bold text-slate-900">Become an Innovation career pathways Advisory Board Member</h4>
                                     <i class="fa-solid fa-people-group text-slate-400 group-hover:text-red-600 transition"></i>
                                 </div>
-                                <p class="text-xs text-slate-600 mb-3 leading-relaxed">Participate in short quarterly meetings with career pathway teachers to help guide curriculum and ensure students in our programs are graduating with competitive technical and durable skills.</p>
-                                <p class="text-[10px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 uppercase">Must be a member of the workforce in one of our target industry pathways.</p>
+                                <p class="text-xs text-slate-600 mb-3 leading-relaxed">Participate in short quarterly meetings with career pathway teachers to help guide curriculum and ensure students in our programs are graduating with the technical and durable skills to allow them to be competitive in the field and support alignment with industry standards.</p>
+                                <p class="text-[10px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 uppercase">Must be a member of the workforce in one of the following industries: Careers in allied health, public health, advanced manufacturing/engineering, clean energy, computer science, digital media, or business.</p>
                             </div>
                         </label>
                     </div>
@@ -259,7 +261,6 @@
 
         <!-- SECTION: ADMIN DASHBOARD -->
         <section id="admin" class="tab-content hidden">
-            <!-- Stats overview cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <div class="text-xs font-bold uppercase text-slate-400 mb-1">Total Active Partners</div>
@@ -315,6 +316,10 @@
     </footer>
 
     <script>
+        
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE INSIDE THE QUOTES
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOP8s29cNWTsw-KpkbQcKWztkRKARZtInUAwHRs5Wj7jRh2V-NeFuW-cwNlWQFrc65Pw/exec";
+
         const RMHS_LOC = [42.5255, -71.1095];
         let map, chart;
         let partnerGeoJsonLayer;
@@ -395,7 +400,6 @@
                 fillOpacity: 1
             }).addTo(map).bindPopup("<div class='p-1'><b class='rocket-text text-sm'>RMHS Central Hub</b><br><span class='text-xs text-slate-600'>62 Oakland Rd, Reading, MA 01867</span></div>");
 
-            // Fetch external GeoJSON or render fallback data
             fetch('rmhs_wbl_partners.geojson')
                 .then(r => {
                     if (!r.ok) throw new Error("GeoJSON HTTP error");
@@ -472,32 +476,44 @@
         }
 
         function refreshDashboard() {
-            if (chart) {
-                chart.update();
-            }
+            if (chart) chart.update();
             const totalEl = document.getElementById('stat-total');
             if (totalEl) {
-                const current = parseInt(totalEl.innerText, 10);
-                totalEl.innerText = current + 1;
+                totalEl.innerText = parseInt(totalEl.innerText, 10) + 1;
             }
         }
 
         document.getElementById('partnerForm').onsubmit = (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
+            const formElement = e.target;
+            const formData = new FormData(formElement);
+            
             const contactName = formData.get('contactName') || 'Partner';
             const orgName = formData.get('orgName') || 'New Organization';
             const industry = formData.get('industry') || 'Careers in Allied Health';
             const selectedTypes = formData.getAll('type').join(', ') || 'General Collaboration';
 
-            // Dynamically increment stats and map for instant interaction
+            // Send to Google Sheets Web App if URL is provided
+            if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE") {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'no-cors'
+                }).then(() => {
+                    console.log("Submitted to Google Sheets successfully.");
+                }).catch(err => {
+                    console.error("Submission error:", err);
+                });
+            }
+
+            // Update stats dynamically
             if (industryData[industry] !== undefined) {
                 industryData[industry] += 1;
             }
             const totalStat = document.getElementById('stat-total');
             if (totalStat) totalStat.innerText = parseInt(totalStat.innerText, 10) + 1;
 
-            // Add simulated marker to fallback set
+            // Add marker to live map set
             const newOffset = (Math.random() - 0.5) * 0.02;
             fallbackPartners.features.push({
                 "type": "Feature",
@@ -505,7 +521,7 @@
                 "geometry": { "type": "Point", "coordinates": [-71.1095 + newOffset, 42.5255 + newOffset] }
             });
 
-            // Show confirmation modal
+            // Display confirmation modal
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4';
             modal.innerHTML = `
@@ -522,12 +538,12 @@
 
             document.getElementById('closeModal').onclick = () => {
                 modal.remove();
-                e.target.reset();
+                formElement.reset();
                 showTab('gis');
             };
         };
 
-        // Initial tab render
+        // Initial tab view setup
         showTab('intake');
     </script>
 </body>

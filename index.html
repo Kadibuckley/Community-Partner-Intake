@@ -116,6 +116,13 @@
                                 <option value="Computer Science / IT">Computer Science / IT</option>
                                 <option value="Digital Media / Marketing">Digital Media / Marketing</option>
                                 <option value="Business / Finance">Business / Finance</option>
+                                <option value="Education & Human Services">Education & Human Services</option>
+                                <option value="Environmental Science & Sustainability">Environmental Science & Sustainability</option>
+                                <option value="Hospitality, Culinary & Tourism">Hospitality, Culinary & Tourism</option>
+                                <option value="Law, Public Policy & Public Safety">Law, Public Policy & Public Safety</option>
+                                <option value="Skilled Trades, Architecture & Construction">Skilled Trades, Architecture & Construction</option>
+                                <option value="Arts, Design & Entertainment">Arts, Design & Entertainment</option>
+                                <option value="Other">Other / Unlisted Pathway</option>
                             </select>
                         </div>
                         <div class="md:col-span-2 space-y-2">
@@ -318,7 +325,7 @@
     <script>
         
         // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE INSIDE THE QUOTES
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyOP8s29cNWTsw-KpkbQcKWztkRKARZtInUAwHRs5Wj7jRh2V-NeFuW-cwNlWQFrc65Pw/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlj26SWk8PfgIR2sUqZNUIxZCnKpWKORgX_9Vc1zEzre2BSUUAzOoy4biwRF55g7GHmg/exec";
 
         const RMHS_LOC = [42.5255, -71.1095];
         let map, chart;
@@ -453,7 +460,7 @@
                     labels: Object.keys(industryData),
                     datasets: [{
                         data: Object.values(industryData),
-                        backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+                        backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f97316'],
                         borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
@@ -509,6 +516,8 @@
             // Update stats dynamically
             if (industryData[industry] !== undefined) {
                 industryData[industry] += 1;
+            } else {
+                industryData[industry] = 1;
             }
             const totalStat = document.getElementById('stat-total');
             if (totalStat) totalStat.innerText = parseInt(totalStat.innerText, 10) + 1;

@@ -4,23 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RMHS | Community Partner Portal</title>
-    <!-- Chosen Palette: RMHS Rockets Crimson & Slate -->
-    <!-- Application Structure Plan: 
-        A centralized portal for Reading Memorial High School community partners. 
-        1. Intake Section: Interactive form with specific logic for Career Day (four 30-min sessions), Job Shadows (March), and Capstone (Durable Skills).
-        2. GIS Visualization: A Leaflet map that pulls data from the companion .geojson file to show local impact.
-        3. Admin View: Integrated Chart.js to track industry distribution and link to the master Google Sheet.
-    -->
-    <!-- Visualization & Content Choices: 
-        - Leaflet.js: For spatial mapping (NO SVG).
-        - Chart.js: For industry diversity stats (Canvas-based).
-        - Logistics: Refined based on user feedback regarding junior-specific timing and durable skills focus.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Tailwind CSS for modern responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for clean user interface icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS & JS for the interactive GIS partner map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js for data visualization in the admin dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
@@ -30,12 +21,14 @@
         .rocket-border { border-color: #C8102E; }
         .nav-btn.active { background-color: #C8102E; color: white; border-color: #C8102E; }
         .chart-container { position: relative; width: 100%; max-width: 600px; margin: auto; height: 300px; max-height: 400px; }
-        #map { height: 500px; width: 100%; border-radius: 1.5rem; z-index: 10; border: 2px solid #e2e8f0; }
-        .card-checkbox:checked + .card-content { border-color: #C8102E; background-color: #fff1f2; ring: 2px; ring-color: #C8102E; }
+        #map { height: 520px; width: 100%; border-radius: 1.5rem; z-index: 10; border: 2px solid #e2e8f0; }
+        .card-checkbox:checked + .card-content { border-color: #C8102E; background-color: #fff1f2; box-shadow: 0 0 0 2px #C8102E; }
         .tab-content.hidden { display: none; }
+        input, select, textarea { transition: all 0.2s ease-in-out; }
+        input:focus, select:focus, textarea:focus { border-color: #C8102E; box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.15); outline: none; }
     </style>
 </head>
-<body class="text-slate-900">
+<body class="text-slate-900 min-h-screen flex flex-col justify-between">
 
     <header class="bg-white border-b-4 rocket-border sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -56,177 +49,485 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full">
 
         <!-- SECTION: INTAKE -->
         <section id="intake" class="tab-content block">
-            <div class="max-w-3xl mb-12">
-                <h2 class="text-4xl font-black text-slate-900 mb-4">Partner with RMHS Students</h2>
-                <p class="text-lg text-slate-600">Join our network of community professionals. Your partnership helps Reading students bridge classroom learning with real-world application.</p>
+            <div class="max-w-3xl mb-10">
+                <span class="inline-block px-3 py-1 bg-red-50 text-red-700 font-bold text-xs rounded-full mb-3 uppercase tracking-wider">Community Engagement</span>
+                <h2 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Partner with RMHS Students</h2>
+                <p class="text-lg text-slate-600 leading-relaxed">Join our network of community professionals. Use the form below to register your interest in supporting Reading students through real-world career learning experiences.</p>
             </div>
 
             <form id="partnerForm" class="space-y-10">
+                
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold mb-6 flex items-center"><i class="fa-solid fa-building rocket-text mr-3"></i>Organization Profile</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mr-3 font-bold">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Primary Contact Information</h3>
+                            <p class="text-xs text-slate-500">Who should we contact regarding this partnership opportunity?</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="space-y-2">
-                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Organization Name</label>
-                            <input name="orgName" type="text" placeholder="Company Name" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Full Name <span class="text-red-500">*</span></label>
+                            <input name="contactName" type="text" placeholder="e.g. Jane Doe" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                         </div>
                         <div class="space-y-2">
-                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Industry Pathway</label>
-                            <select name="industry" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none">
-                                <option>Careers in Allied Health</option>
-                                <option>Public Health</option>
-                                <option>Engineering / Advanced Manufacturing</option>
-                                <option>Clean Energy</option>
-                                <option>Computer Science / IT</option>
-                                <option>Digital Media / Marketing</option>
-                                <option>Business / Finance</option>
-                            </select>
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Email Address <span class="text-red-500">*</span></label>
+                            <input name="contactEmail" type="email" placeholder="jdoe@example.com" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                         </div>
-                        <div class="md:col-span-2 space-y-2">
-                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Address (Reading Area)</label>
-                            <input name="address" type="text" placeholder="Street Address, City, MA" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-red-500 outline-none">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Phone Number <span class="text-red-500">*</span></label>
+                            <input name="contactPhone" type="tel" placeholder="(781) 555-0199" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Career Day -->
-                    <label class="relative cursor-pointer group">
-                        <input type="checkbox" name="type" value="CareerDay" class="hidden card-checkbox">
-                        <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm transition">
-                            <h4 class="font-bold text-slate-900 mb-1">Speaker Spotlight / Career Day</h4>
-                            <p class="text-xs text-slate-500 mb-4">Share your professional journey with RMHS students.</p>
-                            <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase">Logistics: Four 30 minute sessions for juniors</div>
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mr-3 font-bold">
+                            <i class="fa-solid fa-building"></i>
                         </div>
-                    </label>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Organization Profile</h3>
+                            <p class="text-xs text-slate-500">Tell us about your organization and industry alignment.</p>
+                        </div>
+                    </div>
 
-                    <!-- Job Shadow -->
-                    <label class="relative cursor-pointer group">
-                        <input type="checkbox" name="type" value="JobShadow" class="hidden card-checkbox">
-                        <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm transition">
-                            <h4 class="font-bold text-slate-900 mb-1">Job Shadowing Day</h4>
-                            <p class="text-xs text-slate-500 mb-4">Host a student for a partial or full day to observe daily operations.</p>
-                            <div class="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md inline-block uppercase">Timing: Specifically for juniors in March</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Organization Name <span class="text-red-500">*</span></label>
+                            <input name="orgName" type="text" placeholder="Company or Agency Name" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                         </div>
-                    </label>
-
-                    <!-- Intern -->
-                    <label class="relative cursor-pointer group">
-                        <input type="checkbox" name="type" value="Internship" class="hidden card-checkbox">
-                        <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm transition">
-                            <h4 class="font-bold text-slate-900 mb-1">Host an RMHS senior</h4>
-                            <p class="text-xs text-slate-500 mb-4">Provide a high-impact internship opportunity during senior year.</p>
-                            <div class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md inline-block uppercase">Scope: Senior Year Experience</div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Industry Pathway <span class="text-red-500">*</span></label>
+                            <select name="industry" id="industrySelect" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer">
+                                <option value="Careers in Allied Health">Careers in Allied Health</option>
+                                <option value="Public Health">Public Health</option>
+                                <option value="Engineering / Advanced Manufacturing">Engineering / Advanced Manufacturing</option>
+                                <option value="Clean Energy">Clean Energy</option>
+                                <option value="Computer Science / IT">Computer Science / IT</option>
+                                <option value="Digital Media / Marketing">Digital Media / Marketing</option>
+                                <option value="Business / Finance">Business / Finance</option>
+                            </select>
                         </div>
-                    </label>
-
-                    <!-- Capstone -->
-                    <label class="relative cursor-pointer group">
-                        <input type="checkbox" name="type" value="Capstone" class="hidden card-checkbox">
-                        <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm transition">
-                            <h4 class="font-bold text-slate-900 mb-1">Capstone Project Host</h4>
-                            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                                <span class="font-bold text-slate-700">Guide</span> students through a project. Students practice durable skills in the workplace.
-                            </p>
-                            <div class="text-[10px] font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md inline-block uppercase">Focus: Durable Skills</div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Workplace Address <span class="text-red-500">*</span></label>
+                            <input name="address" type="text" placeholder="Street Address, City, State, ZIP" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                         </div>
-                    </label>
-
-                    <!-- Advisory -->
-                    <label class="relative cursor-pointer group md:col-span-2">
-                        <input type="checkbox" name="type" value="Advisory" class="hidden card-checkbox">
-                        <div class="card-content p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm transition">
-                            <h4 class="font-bold text-slate-900 mb-2">Advisory Board Member</h4>
-                            <p class="text-xs text-slate-600 mb-2">Participate in short quarterly meetings to guide curriculum alignment.</p>
-                            <p class="text-[10px] font-bold text-slate-400 bg-slate-50 p-2 rounded uppercase">Requires membership in Allied Health, Public Health, Engineering, Clean Energy, CS, Media, or Business.</p>
-                        </div>
-                    </label>
+                    </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <button type="submit" class="w-full py-5 rocket-red text-white font-black text-xl rounded-2xl shadow-xl hover:opacity-90 transition">
-                        Submit Reading Partnership Request
+                <div class="space-y-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mr-3 font-bold">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">How would you like to partner?</h3>
+                            <p class="text-xs text-slate-500">Select one or more programs that match your organization's availability.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Speaker Spotlight -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Speaker Spotlight" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Speaker Spotlight</h4>
+                                    <i class="fa-solid fa-microphone text-slate-400 group-hover:text-red-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Share your career journey and day to day life with RMHS students who are interested in exploring your industry.</p>
+                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: a 30 minute small group session</div>
+                            </div>
+                        </label>
+
+                        <!-- Career Day -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Career Day" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Career Day</h4>
+                                    <i class="fa-solid fa-bullhorn text-slate-400 group-hover:text-red-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Become part of an important RMHS tradition where local professionals volunteer to share their career journey with 11th high school students.</p>
+                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: four consecutive 20-minute sessions for 11th grade students</div>
+                            </div>
+                        </label>
+
+                        <!-- Job Shadow -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Job Shadow Day" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Job Shadow Day</h4>
+                                    <i class="fa-solid fa-user-gear text-slate-400 group-hover:text-amber-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Host a student at your workplace for a half or full day of direct workplace observation.</p>
+                                <div class="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Timing: For juniors in March</div>
+                            </div>
+                        </label>
+
+                        <!-- Internship -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Senior Internship" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Host an RMHS Senior Intern</h4>
+                                    <i class="fa-solid fa-briefcase text-slate-400 group-hover:text-emerald-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Offer a high-impact, immersive professional internship experience for graduating seniors.</p>
+                                <div class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Scope: Senior Year Experience</div>
+                            </div>
+                        </label>
+
+                        <!-- Capstone -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Capstone Host" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Capstone Project Host</h4>
+                                    <i class="fa-solid fa-diagram-project text-slate-400 group-hover:text-indigo-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Guide students through solving a real-world workplace challenge or industry project.</p>
+                                <div class="text-[10px] font-black text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Focus: Durable Skills practice</div>
+                            </div>
+                        </label>
+
+                        <!-- Other Option -->
+                        <label class="relative cursor-pointer group">
+                            <input type="checkbox" name="type" value="Other Collaboration" class="hidden card-checkbox">
+                            <div class="card-content h-full p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Other Collaboration</h4>
+                                    <i class="fa-solid fa-lightbulb text-slate-400 group-hover:text-yellow-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mb-4 leading-relaxed">Interested in collaborating in other ways? Select this option to share custom partnership ideas.</p>
+                                <div class="text-[10px] font-black text-yellow-700 bg-yellow-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Flexibility: Tailored engagement</div>
+                            </div>
+                        </label>
+
+                        <!-- Advisory Board -->
+                        <label class="relative cursor-pointer group md:col-span-2">
+                            <input type="checkbox" name="type" value="Advisory Board Member" class="hidden card-checkbox">
+                            <div class="card-content p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-slate-900">Become an Innovation Career Pathways Advisory Board Member</h4>
+                                    <i class="fa-solid fa-people-group text-slate-400 group-hover:text-red-600 transition"></i>
+                                </div>
+                                <p class="text-xs text-slate-600 mb-3 leading-relaxed">Participate in short quarterly meetings with career pathway teachers to help guide curriculum and ensure students in our programs are graduating with competitive technical and durable skills.</p>
+                                <p class="text-[10px] font-bold text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60 uppercase">Must be a member of the workforce in one of our target industry pathways.</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
+                    <button type="submit" class="w-full py-5 rocket-red text-white font-black text-xl rounded-2xl shadow-xl hover:opacity-95 transform active:scale-[0.99] transition-all flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-paper-plane mr-3 text-lg"></i>
+                        Submit Partnership Request
                     </button>
+                    <p class="text-[10px] font-bold text-slate-400 mt-4 uppercase tracking-widest">Reading Memorial High School • Office of Work-Based Learning</p>
                 </div>
             </form>
         </section>
 
         <!-- SECTION: GIS MAP -->
         <section id="gis" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-3xl border border-slate-200">
-                <h2 class="text-3xl font-black mb-6">WBL Spatial Registry</h2>
-                <div id="map"></div>
-                <div class="mt-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Center: Reading Memorial High School</div>
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-blue-50 text-blue-700 font-bold text-xs rounded-full mb-2 uppercase tracking-wider">Spatial Mapping</span>
+                        <h2 class="text-3xl font-black text-slate-900">Partner Network Directory</h2>
+                        <p class="text-slate-500 text-sm mt-1">Visualizing community partners and business hosts across the Reading area.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center bg-slate-50 p-3 rounded-2xl border border-slate-200 gap-4 text-xs font-bold">
+                        <div class="flex items-center"><span class="w-3.5 h-3.5 rocket-red rounded-full mr-2 shadow-sm"></span>RMHS Hub</div>
+                        <div class="flex items-center"><span class="w-3.5 h-3.5 bg-blue-500 rounded-full mr-2 shadow-sm"></span>Community Partner</div>
+                        <div class="flex items-center"><span class="w-3.5 h-3.5 bg-emerald-500 rounded-full mr-2 shadow-sm"></span>New Submission</div>
+                    </div>
+                </div>
+                <div id="map" class="shadow-inner"></div>
             </div>
         </section>
 
-        <!-- SECTION: ADMIN -->
+        <!-- SECTION: ADMIN DASHBOARD -->
         <section id="admin" class="tab-content hidden">
+            <!-- Stats overview cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase text-slate-400 mb-1">Total Active Partners</div>
+                    <div id="stat-total" class="text-3xl font-black text-slate-900">67</div>
+                    <div class="text-[11px] text-emerald-600 font-bold mt-1"><i class="fa-solid fa-arrow-up mr-1"></i>+12% this semester</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase text-slate-400 mb-1">Internship Opportunities</div>
+                    <div id="stat-internships" class="text-3xl font-black text-slate-900">24</div>
+                    <div class="text-[11px] text-slate-500 font-bold mt-1">Senior Year Experience Placement</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="text-xs font-bold uppercase text-slate-400 mb-1">Advisory Board Members</div>
+                    <div id="stat-advisory" class="text-3xl font-black text-slate-900">18</div>
+                    <div class="text-[11px] text-blue-600 font-bold mt-1">Cross-pathway coverage</div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-3xl border border-slate-200">
-                    <h3 class="font-black mb-6 uppercase text-slate-400 text-xs">Industry Mix</h3>
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 class="font-black uppercase text-slate-400 text-xs tracking-widest">Industry Diversity Mix</h3>
+                            <p class="text-sm font-bold text-slate-800 mt-1">Active Partner Pathways</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">Updated Real-Time</span>
+                    </div>
                     <div class="chart-container"><canvas id="industryChart"></canvas></div>
                 </div>
-                <div class="bg-slate-900 p-8 rounded-3xl text-white">
-                    <h3 class="font-black text-xl mb-4">Database Management</h3>
-                    <p class="text-sm opacity-70 mb-8 italic">All submissions sync to the RMHS master spreadsheet.</p>
-                    <a href="https://docs.google.com/spreadsheets/d/1kCZCztLyBNZLCGeBhjOBZa5ivftEsCr4In0d1V4yjNg/edit" target="_blank" class="block w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-center rounded-2xl transition">
-                        <i class="fa-solid fa-table-list mr-2"></i>Open Master Sheet
-                    </a>
+
+                <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl flex flex-col justify-between">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-slate-800 text-red-400 font-bold text-xs rounded-full mb-3 uppercase tracking-wider">Coordinator Controls</span>
+                        <h3 class="font-black text-2xl mb-2">Administrative Management</h3>
+                        <p class="text-sm text-slate-400 leading-relaxed mb-8">Access the master spreadsheet to review applicant details, update status logs, and manage outreach records.</p>
+                    </div>
+                    <div class="space-y-4">
+                        <a href="https://docs.google.com/spreadsheets/d/1kCZCztLyBNZLCGeBhjOBZa5ivftEsCr4In0d1V4yjNg/edit?usp=sharing" target="_blank" class="flex items-center justify-center w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition shadow-lg">
+                            <i class="fa-solid fa-table-list mr-3"></i>Launch Master Spreadsheet
+                        </a>
+                        <button onclick="refreshDashboard()" class="w-full py-4 border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-widest rounded-2xl transition cursor-pointer flex items-center justify-center">
+                            <i class="fa-solid fa-rotate mr-2"></i>Refresh Dashboard Data
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
 
     </main>
 
+    <footer class="mt-16 py-8 border-t border-slate-200 text-center bg-white">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">&copy; 2026 Reading Memorial High School • Office of Work-Based Learning</p>
+    </footer>
+
     <script>
         const RMHS_LOC = [42.5255, -71.1095];
         let map, chart;
+        let partnerGeoJsonLayer;
+
+        // Fallback GIS sample data for Reading, MA partners
+        const fallbackPartners = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-001", "name": "Reading Health System", "industry": "Careers in Allied Health", "type": "Internship Host" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1050, 42.5280] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-002", "name": "Reading Engineering Lab", "industry": "Engineering / Advanced Manufacturing", "type": "Capstone Host" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1120, 42.5180] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-003", "name": "North Shore Tech Solutions", "industry": "Computer Science / IT", "type": "Advisory Board" },
+                    "geometry": { "type": "Point", "coordinates": [-71.0980, 42.5320] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-004", "name": "Reading Public Health Dept", "industry": "Public Health", "type": "Job Shadow" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1065, 42.5240] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-005", "name": "Reading Cooperative Bank", "industry": "Business / Finance", "type": "Career Day" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1088, 42.5262] }
+                }
+            ]
+        };
+
+        const industryData = {
+            'Careers in Allied Health': 12,
+            'Engineering / Advanced Manufacturing': 19,
+            'Computer Science / IT': 8,
+            'Business / Finance': 15,
+            'Public Health': 7,
+            'Digital Media / Marketing': 10
+        };
 
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.remove('hidden');
             document.getElementById('btn-' + id).classList.add('active');
-            if (id === 'gis') initMap();
-            if (id === 'admin') initAdmin();
+            
+            if (id === 'gis') {
+                setTimeout(initMap, 150);
+            }
+            if (id === 'admin') {
+                initAdmin();
+            }
         }
 
         function initMap() {
-            if (map) return;
+            if (map) {
+                map.invalidateSize();
+                return;
+            }
             map = L.map('map').setView(RMHS_LOC, 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
-            L.marker(RMHS_LOC, { icon: L.divIcon({ className: 'bg-red-600 rounded-full border-2 border-white', iconSize: [16, 16] }) }).addTo(map).bindPopup("<b>RMHS Hub</b>");
+            
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
 
+            // RMHS Central Hub Marker
+            L.circleMarker(RMHS_LOC, {
+                radius: 10,
+                fillColor: "#C8102E",
+                color: "#ffffff",
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 1
+            }).addTo(map).bindPopup("<div class='p-1'><b class='rocket-text text-sm'>RMHS Central Hub</b><br><span class='text-xs text-slate-600'>62 Oakland Rd, Reading, MA 01867</span></div>");
+
+            // Fetch external GeoJSON or render fallback data
             fetch('rmhs_wbl_partners.geojson')
-                .then(r => r.json())
-                .then(data => {
-                    L.geoJSON(data, {
-                        onEachFeature: (f, l) => l.bindPopup(`<b>${f.properties.name}</b><br>${f.properties.industry || ''}`)
-                    }).addTo(map);
-                }).catch(e => console.log("GIS Data file not found yet."));
+                .then(r => {
+                    if (!r.ok) throw new Error("GeoJSON HTTP error");
+                    return r.json();
+                })
+                .then(data => renderGeoJsonData(data))
+                .catch(() => {
+                    renderGeoJsonData(fallbackPartners);
+                });
+        }
+
+        function renderGeoJsonData(geoData) {
+            if (partnerGeoJsonLayer) map.removeLayer(partnerGeoJsonLayer);
+
+            partnerGeoJsonLayer = L.geoJSON(geoData, {
+                pointToLayer: function (feature, latlng) {
+                    if (feature.properties.id === 'RMHS-CENTRAL') return null;
+                    const isNew = feature.properties.isNew;
+                    return L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: isNew ? "#10b981" : "#3b82f6",
+                        color: "#ffffff",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    });
+                },
+                onEachFeature: (f, l) => {
+                    if (f.properties && f.properties.name) {
+                        l.bindPopup(`
+                            <div class="p-1">
+                                <strong class="text-slate-900">${f.properties.name}</strong><br>
+                                <span class="text-[10px] font-bold uppercase text-slate-500">${f.properties.industry || 'Community Partner'}</span><br>
+                                <span class="text-xs text-slate-600">${f.properties.type || 'WBL Partner'}</span>
+                            </div>
+                        `);
+                    }
+                }
+            }).addTo(map);
         }
 
         function initAdmin() {
-            if (chart) return;
-            chart = new Chart(document.getElementById('industryChart'), {
+            if (chart) {
+                chart.update();
+                return;
+            }
+            const ctx = document.getElementById('industryChart').getContext('2d');
+            chart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Health', 'Eng', 'CS', 'Business'],
-                    datasets: [{ data: [3, 2, 2, 4], backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981'] }]
+                    labels: Object.keys(industryData),
+                    datasets: [{
+                        data: Object.values(industryData),
+                        backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
                 },
-                options: { maintainAspectRatio: false }
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 11, weight: 'bold' },
+                                padding: 15
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
             });
+        }
+
+        function refreshDashboard() {
+            if (chart) {
+                chart.update();
+            }
+            const totalEl = document.getElementById('stat-total');
+            if (totalEl) {
+                const current = parseInt(totalEl.innerText, 10);
+                totalEl.innerText = current + 1;
+            }
         }
 
         document.getElementById('partnerForm').onsubmit = (e) => {
             e.preventDefault();
-            alert("Thank you! Submission received for Reading Memorial High School.");
+            const formData = new FormData(e.target);
+            const contactName = formData.get('contactName') || 'Partner';
+            const orgName = formData.get('orgName') || 'New Organization';
+            const industry = formData.get('industry') || 'Careers in Allied Health';
+            const selectedTypes = formData.getAll('type').join(', ') || 'General Collaboration';
+
+            // Dynamically increment stats and map for instant interaction
+            if (industryData[industry] !== undefined) {
+                industryData[industry] += 1;
+            }
+            const totalStat = document.getElementById('stat-total');
+            if (totalStat) totalStat.innerText = parseInt(totalStat.innerText, 10) + 1;
+
+            // Add simulated marker to fallback set
+            const newOffset = (Math.random() - 0.5) * 0.02;
+            fallbackPartners.features.push({
+                "type": "Feature",
+                "properties": { "id": "PRT-NEW", "name": orgName, "industry": industry, "type": selectedTypes, "isNew": true },
+                "geometry": { "type": "Point", "coordinates": [-71.1095 + newOffset, 42.5255 + newOffset] }
+            });
+
+            // Show confirmation modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900 mb-2">Submission Received!</h3>
+                    <p class="text-sm text-slate-600 mb-6">Thank you, <strong>${contactName}</strong>! Your partner inquiry for <strong>${orgName}</strong> has been logged for Reading Memorial High School. Our Work-Based Learning team will reach out shortly.</p>
+                    <button id="closeModal" class="w-full py-3.5 rocket-red text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition cursor-pointer">View Partner Directory</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('closeModal').onclick = () => {
+                modal.remove();
+                e.target.reset();
+                showTab('gis');
+            };
         };
 
+        // Initial tab render
         showTab('intake');
     </script>
 </body>

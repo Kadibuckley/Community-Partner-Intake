@@ -421,7 +421,7 @@
         }
 
         // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE INSIDE THE QUOTES
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlj26SWk8PfgIR2sUqZNUIxZCnKpWKORgX_9Vc1zEzre2BSUUAzOoy4biwRF55g7GHmg/exec";
+        const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE";
 
         const RMHS_LOC = [42.5255, -71.1095];
         let map, chart;
@@ -596,14 +596,21 @@
             const industry = formData.get('industry') || 'Careers in Allied Health';
             const selectedTypes = formData.getAll('type').join(', ') || 'General Collaboration';
 
+            // Convert FormData to URLSearchParams (application/x-www-form-urlencoded)
+            // so that Google Apps Script `e.parameter` parses the values natively!
+            const urlParams = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                urlParams.append(key, value);
+            }
+
             // Send to Google Sheets Web App if URL is provided
             if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE") {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    body: formData,
+                    body: urlParams,
                     mode: 'no-cors'
                 }).then(() => {
-                    console.log("Submitted to Google Sheets successfully.");
+                    console.log("Submitted to Google Sheets successfully via URLSearchParams.");
                 }).catch(err => {
                     console.error("Submission error:", err);
                 });
@@ -653,3 +660,10 @@
     </script>
 </body>
 </html>
+```
+
+### Next Action:
+1. Copy the updated `index.html` code above into your GitHub repository (`Community-Partner-Intake`).
+2. Ensure line 282 is updated with your live Web App URL (`const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/.../exec";`).
+3. Commit changes to `main`. 
+4. Run another live test! The submission will now show up directly in your Google Sheet.

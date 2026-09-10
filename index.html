@@ -23,7 +23,8 @@
         .chart-container { position: relative; width: 100%; max-width: 600px; margin: auto; height: 300px; max-height: 400px; }
         #map { height: 520px; width: 100%; border-radius: 1.5rem; z-index: 10; border: 2px solid #e2e8f0; }
         .card-checkbox:checked + .card-content { border-color: #C8102E; background-color: #fff1f2; box-shadow: 0 0 0 2px #C8102E; }
-        .tab-content.hidden { display: none; }
+        .tab-content.hidden { display: none !important; }
+        .tab-content.block { display: block !important; }
         input, select, textarea { transition: all 0.2s ease-in-out; }
         input:focus, select:focus, textarea:focus { border-color: #C8102E; box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.15); outline: none; }
     </style>
@@ -42,9 +43,9 @@
                 </div>
             </div>
             <nav class="flex bg-slate-100 p-1.5 rounded-2xl">
-                <button onclick="showTab('intake')" id="btn-intake" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition active">Partner Sign-Up</button>
-                <button onclick="showTab('gis')" id="btn-gis" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition">GIS Map</button>
-                <button onclick="showTab('admin')" id="btn-admin" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition">Admin Dashboard</button>
+                <button onclick="window.showTab('intake')" id="btn-intake" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition active">Partner Sign-Up</button>
+                <button onclick="window.showTab('gis')" id="btn-gis" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition">GIS Map</button>
+                <button onclick="window.showTab('admin')" id="btn-admin" class="nav-btn px-5 py-2 text-xs font-bold rounded-xl transition">Admin Dashboard</button>
             </nav>
         </div>
     </header>
@@ -178,7 +179,7 @@
                                     <i class="fa-solid fa-bullhorn text-slate-400 group-hover:text-red-600 transition"></i>
                                 </div>
                                 <p class="text-xs text-slate-500 mb-4 leading-relaxed">Become part of an important RMHS tradition where local professionals volunteer to share their career journey with 11th high school students. <a href="https://docs.google.com/document/d/1ijEFUyK_QTSa0NH8NGLKGR9v7OGvUvCa15w_mE5Tctg/edit?usp=sharing" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" class="underline font-bold text-red-600 hover:text-red-800">Click here for more information</a>.</p>
-                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: four consecutive 30-minute sessions for 11th grade students who select to learn about your industry • RMHS Lead: Lynna Williams</div>
+                                <div class="text-[10px] font-black text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md inline-block uppercase tracking-wide">Logistics: four consecutive 30-minute sessions for 11th grade students • RMHS Lead: Lynna Williams</div>
                             </div>
                         </label>
 
@@ -394,6 +395,39 @@
         let partnerGeoJsonLayer = null;
         let chart = null;
 
+        // TAB SWITCHING FUNCTION - Explicitly bound to window for inline onclick handlers
+        window.showTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+                tab.classList.remove('block');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+                selectedTab.classList.add('block');
+            }
+            
+            const selectedBtn = document.getElementById('btn-' + tabId);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+
+            if (tabId === 'gis') {
+                if (!map) {
+                    initMap();
+                } else {
+                    setTimeout(() => { if (map) map.invalidateSize(); }, 200);
+                }
+            }
+            if (tabId === 'admin') {
+                checkAdminAuth();
+            }
+        };
+
         const industryData = {
             "Careers in Allied Health": 12,
             "Engineering / Advanced Manufacturing": 10,
@@ -440,38 +474,6 @@
                 }
             ]
         };
-
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-                tab.classList.remove('block');
-            });
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            const selectedTab = document.getElementById(tabId);
-            if (selectedTab) {
-                selectedTab.classList.remove('hidden');
-                selectedTab.classList.add('block');
-            }
-            
-            const selectedBtn = document.getElementById('btn-' + tabId);
-            if (selectedBtn) {
-                selectedBtn.classList.add('active');
-            }
-
-            if (tabId === 'gis') {
-                if (!map) {
-                    initMap();
-                } else {
-                    setTimeout(() => { map.invalidateSize(); }, 200);
-                }
-            }
-            if (tabId === 'admin') {
-                checkAdminAuth();
-            }
-        }
 
         function initMap() {
             if (map) return;
@@ -646,6 +648,7 @@
             });
         }
 
+        // Form Submission Handler
         document.getElementById('partnerForm').onsubmit = (e) => {
             e.preventDefault();
             const formElement = e.target;
@@ -722,14 +725,14 @@
             document.getElementById('closeModal').onclick = () => {
                 modal.remove();
                 formElement.reset();
-                showTab('gis');
+                window.showTab('gis');
             };
         };
 
         // Initialize default tab and check URL status on load
         window.addEventListener('DOMContentLoaded', () => {
             checkScriptUrlStatus();
-            showTab('intake');
+            window.showTab('intake');
         });
     </script>
 </body>

@@ -51,7 +51,6 @@
 
     <main class="max-w-7xl mx-auto px-6 py-10 flex-grow w-full">
 
-        <!-- SECTION: INTAKE -->
         <section id="intake" class="tab-content block">
             <div class="max-w-3xl mb-10">
                 <span class="inline-block px-3 py-1 bg-red-50 text-red-700 font-bold text-xs rounded-full mb-3 uppercase tracking-wider">Community Engagement</span>
@@ -222,7 +221,7 @@
                             </div>
                         </label>
 
-                        <!-- 7. Advisory Board Member (Last Option, full width) -->
+                        <!-- 7. Advisory Board Member -->
                         <label class="relative cursor-pointer group md:col-span-2">
                             <input type="checkbox" name="type" value="Advisory Board Member" class="hidden card-checkbox">
                             <div class="card-content p-6 bg-white border-2 border-slate-100 rounded-2xl shadow-sm hover:border-slate-300 transition">
@@ -248,7 +247,6 @@
             </form>
         </section>
 
-        <!-- SECTION: GIS MAP -->
         <section id="gis" class="tab-content hidden">
             <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -267,10 +265,9 @@
             </div>
         </section>
 
-        <!-- SECTION: ADMIN DASHBOARD -->
         <section id="admin" class="tab-content hidden">
 
-            <!-- LOGIN CONTAINER (Shown when NOT logged in) -->
+            <!-- LOGIN CONTAINER -->
             <div id="admin-login-container" class="max-w-md mx-auto my-12 bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
                 <div class="text-center mb-6">
                     <div class="w-14 h-14 rocket-red rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-md">
@@ -384,10 +381,149 @@
     </footer>
 
     <script>
+        // GOOGLE APPS SCRIPT WEB APP URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlj26SWk8PfgIR2sUqZNUIxZCnKpWKORgX_9Vc1zEzre2BSUUAzOoy4biwRF55g7GHmg/exec";
+
         // ADMIN CREDENTIALS
         const ADMIN_EMAIL = "kadi.buckley@reading.k12.ma.us";
         const ADMIN_PASS = "Grace2017!";
         let isAuthenticated = false;
+
+        // Global map & chart instances
+        let map = null;
+        let partnerGeoJsonLayer = null;
+        let chart = null;
+
+        const industryData = {
+            "Careers in Allied Health": 12,
+            "Engineering / Advanced Manufacturing": 10,
+            "Computer Science / IT": 9,
+            "Public Health": 8,
+            "Business / Finance": 11,
+            "Digital Media / Marketing": 7,
+            "Clean Energy": 5,
+            "Education & Human Services": 5
+        };
+
+        const fallbackPartners = {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "properties": { "id": "RMHS-CENTRAL", "name": "Reading Memorial High School", "industry": "School Hub" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1095, 42.5255] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-001", "name": "Reading Health System", "industry": "Careers in Allied Health", "type": "Senior Internship" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1050, 42.5280] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-002", "name": "Reading Engineering Lab", "industry": "Engineering / Advanced Manufacturing", "type": "Capstone Host" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1120, 42.5180] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-003", "name": "North Shore Tech Solutions", "industry": "Computer Science / IT", "type": "Advisory Board Member" },
+                    "geometry": { "type": "Point", "coordinates": [-71.0980, 42.5320] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-004", "name": "Reading Department of Public Health", "industry": "Public Health", "type": "Job Shadow Day" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1065, 42.5240] }
+                },
+                {
+                    "type": "Feature",
+                    "properties": { "id": "PRT-005", "name": "Reading Cooperative Bank", "industry": "Business / Finance", "type": "Career Day" },
+                    "geometry": { "type": "Point", "coordinates": [-71.1088, 42.5262] }
+                }
+            ]
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+                tab.classList.remove('block');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+                selectedTab.classList.add('block');
+            }
+            
+            const selectedBtn = document.getElementById('btn-' + tabId);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+
+            if (tabId === 'gis') {
+                if (!map) {
+                    initMap();
+                } else {
+                    setTimeout(() => { map.invalidateSize(); }, 200);
+                }
+            }
+            if (tabId === 'admin') {
+                checkAdminAuth();
+            }
+        }
+
+        function initMap() {
+            if (map) return;
+            
+            map = L.map('map').setView([42.5255, -71.1095], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Add RMHS Hub Marker
+            const schoolIcon = L.divIcon({
+                html: '<div style="background-color:#C8102E; width:22px; height:22px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.4);"></div>',
+                className: '',
+                iconSize: [22, 22]
+            });
+
+            L.marker([42.5255, -71.1095], { icon: schoolIcon }).addTo(map)
+                .bindPopup('<strong class="text-red-700">Reading Memorial High School</strong><br><span class="text-xs">Work-Based Learning Hub</span>');
+
+            renderGeoJsonData(fallbackPartners);
+        }
+
+        function renderGeoJsonData(geoData) {
+            if (partnerGeoJsonLayer && map) map.removeLayer(partnerGeoJsonLayer);
+
+            partnerGeoJsonLayer = L.geoJSON(geoData, {
+                pointToLayer: function (feature, latlng) {
+                    if (feature.properties.id === 'RMHS-CENTRAL') return null;
+                    const isNew = feature.properties.isNew;
+                    return L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: isNew ? "#10b981" : "#3b82f6",
+                        color: "#ffffff",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    });
+                },
+                onEachFeature: (f, l) => {
+                    if (f && f.properties && f.properties.name) {
+                        l.bindPopup(`
+                            <div class="p-1">
+                                <strong class="text-slate-900">${f.properties.name}</strong><br>
+                                <span class="text-[10px] font-bold uppercase text-slate-500">${f.properties.industry || 'Community Partner'}</span><br>
+                                <span class="text-xs text-slate-600">${f.properties.type || 'WBL Partner'}</span>
+                            </div>
+                        `);
+                    }
+                }
+            }).addTo(map);
+        }
 
         function checkAdminAuth() {
             if (sessionStorage.getItem('rmhs_admin_auth') === 'true') {
@@ -432,14 +568,6 @@
             checkAdminAuth();
         }
 
-        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE INSIDE THE QUOTES
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlj26SWk8PfgIR2sUqZNUIxZCnKpWKORgX_9Vc1zEzre2BSUUAzOoy4biwRF55g7GHmg/exec";
-
-        // Check URL status on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            checkScriptUrlStatus();
-        });
-
         function checkScriptUrlStatus() {
             const badge = document.getElementById('script-url-badge');
             if (!badge) return;
@@ -458,10 +586,11 @@
 
         function runBackendDiagnostic() {
             const output = document.getElementById('diagnostic-output');
+            if (!output) return;
             output.innerHTML = "⌛ Pinging Google Apps Script backend...";
 
             if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE")) {
-                output.innerHTML = "❌ <strong class='text-red-400'>Error:</strong> GOOGLE_SCRIPT_URL is still placeholder text. Please replace it in index.html with your active Web App URL ending in /exec.";
+                output.innerHTML = "❌ <strong class='text-red-400'>Error:</strong> GOOGLE_SCRIPT_URL is still placeholder text. Replace it in index.html with your Google Web App URL ending in /exec.";
                 return;
             }
 
@@ -479,41 +608,11 @@
                 mode: 'no-cors'
             })
             .then(() => {
-                output.innerHTML = "✅ <strong class='text-emerald-400'>Request Sent!</strong> Check your Google Sheet tab 'Debug_Logs' or main sheet. If a new row appears, synchronization is 100% active!";
+                output.innerHTML = "✅ <strong class='text-emerald-400'>Request Sent!</strong> Check your Google Sheet tab 'Debug_Logs'. If a new row appears, synchronization is 100% active!";
             })
             .catch(err => {
                 output.innerHTML = "❌ <strong class='text-red-400'>Network Error:</strong> " + err.toString();
             });
-        }
-
-        function renderGeoJsonData(geoData) {
-            if (partnerGeoJsonLayer) map.removeLayer(partnerGeoJsonLayer);
-
-            partnerGeoJsonLayer = L.geoJSON(geoData, {
-                pointToLayer: function (feature, latlng) {
-                    if (feature.properties.id === 'RMHS-CENTRAL') return null;
-                    const isNew = feature.properties.isNew;
-                    return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: isNew ? "#10b981" : "#3b82f6",
-                        color: "#ffffff",
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.9
-                    });
-                },
-                onEachFeature: (f, l) => {
-                    if (f.properties && f.properties.name) {
-                        l.bindPopup(`
-                            <div class="p-1">
-                                <strong class="text-slate-900">${f.properties.name}</strong><br>
-                                <span class="text-[10px] font-bold uppercase text-slate-500">${f.properties.industry || 'Community Partner'}</span><br>
-                                <span class="text-xs text-slate-600">${f.properties.type || 'WBL Partner'}</span>
-                            </div>
-                        `);
-                    }
-                }
-            }).addTo(map);
         }
 
         function initAdmin() {
@@ -521,14 +620,15 @@
                 chart.update();
                 return;
             }
-            const ctx = document.getElementById('industryChart').getContext('2d');
-            chart = new Chart(ctx, {
+            const ctx = document.getElementById('industryChart');
+            if (!ctx) return;
+            chart = new Chart(ctx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(industryData),
                     datasets: [{
                         data: Object.values(industryData),
-                        backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#f97316'],
+                        backgroundColor: ['#C8102E', '#334155', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#6366f1'],
                         borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
@@ -538,24 +638,12 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { size: 11, weight: 'bold' },
-                                padding: 15
-                            }
+                            labels: { boxWidth: 12, font: { size: 11, weight: 'bold' }, padding: 15 }
                         }
                     },
                     cutout: '68%'
                 }
             });
-        }
-
-        function refreshDashboard() {
-            if (chart) chart.update();
-            const totalEl = document.getElementById('stat-total');
-            if (totalEl) {
-                totalEl.innerText = parseInt(totalEl.innerText, 10) + 1;
-            }
         }
 
         document.getElementById('partnerForm').onsubmit = (e) => {
@@ -568,7 +656,6 @@
             const industry = formData.get('industry') || 'Careers in Allied Health';
             const selectedTypes = formData.getAll('type').join(', ') || 'General Collaboration';
 
-            // Check if URL is placeholder
             const isPlaceholder = !GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE");
 
             // Convert FormData to URLSearchParams (application/x-www-form-urlencoded)
@@ -577,7 +664,7 @@
                 urlParams.append(key, value);
             }
 
-            // Send to Google Sheets Web App
+            // Send payload to Google Sheet Web App API
             if (!isPlaceholder) {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -590,7 +677,7 @@
                 });
             }
 
-            // Update stats dynamically
+            // Dynamically update stat cards
             if (industryData[industry] !== undefined) {
                 industryData[industry] += 1;
             } else {
@@ -599,7 +686,7 @@
             const totalStat = document.getElementById('stat-total');
             if (totalStat) totalStat.innerText = parseInt(totalStat.innerText, 10) + 1;
 
-            // Add marker to live map set
+            // Add marker to map
             const newOffset = (Math.random() - 0.5) * 0.02;
             fallbackPartners.features.push({
                 "type": "Feature",
@@ -613,7 +700,7 @@
             
             let statusNotice = isPlaceholder ? 
                 `<div class="p-3 mb-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl text-left">
-                    <strong>⚠️ Setup Notice:</strong> Your submission was simulated locally because <code>GOOGLE_SCRIPT_URL</code> is not configured yet in GitHub.
+                    <strong>⚠️ Setup Notice:</strong> Submission simulated locally because <code>GOOGLE_SCRIPT_URL</code> is not configured yet in index.html.
                  </div>` : 
                 `<div class="p-3 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl text-left">
                     <strong>✅ Synchronized:</strong> Request transmitted directly to your Google Sheet!
@@ -639,8 +726,11 @@
             };
         };
 
-        // Initial tab view setup
-        showTab('intake');
+        // Initialize default tab and check URL status on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkScriptUrlStatus();
+            showTab('intake');
+        });
     </script>
 </body>
 </html>

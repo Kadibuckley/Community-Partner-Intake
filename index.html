@@ -346,19 +346,31 @@
                         <div class="chart-container"><canvas id="industryChart"></canvas></div>
                     </div>
 
-                    <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl flex flex-col justify-between">
+                    <div class="bg-slate-900 p-8 rounded-3xl text-white shadow-xl flex flex-col justify-between space-y-6">
                         <div>
-                            <span class="inline-block px-3 py-1 bg-slate-800 text-red-400 font-bold text-xs rounded-full mb-3 uppercase tracking-wider">Coordinator Controls</span>
+                            <span class="inline-block px-3 py-1 bg-slate-800 text-red-400 font-bold text-xs rounded-full mb-3 uppercase tracking-wider">Coordinator Controls & Diagnostics</span>
                             <h3 class="font-black text-2xl mb-2">Administrative Management</h3>
-                            <p class="text-sm text-slate-400 leading-relaxed mb-8">Access the master spreadsheet to review applicant details, update status logs, and manage outreach records.</p>
+                            <p class="text-sm text-slate-400 leading-relaxed mb-4">Access the master spreadsheet or run backend diagnostics to verify Google Sheets synchronization.</p>
+                            
+                            <!-- DIAGNOSTIC STATUS WIDGET -->
+                            <div class="p-4 bg-slate-800/80 border border-slate-700 rounded-2xl mb-4 text-xs space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-400 font-bold uppercase">Google Web App URL Status:</span>
+                                    <span id="script-url-badge" class="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30">Checking...</span>
+                                </div>
+                                <div id="diagnostic-output" class="text-slate-300 font-mono text-[11px] bg-slate-950 p-2.5 rounded-xl border border-slate-800 break-all max-h-24 overflow-y-auto">
+                                    Click "Test Backend Sync" below to ping your Google Sheet API.
+                                </div>
+                            </div>
                         </div>
-                        <div class="space-y-4">
-                            <a href="https://docs.google.com/spreadsheets/d/1kCZCztLyBNZLCGeBhjOBZa5ivftEsCr4In0d1V4yjNg/edit?usp=sharing" target="_blank" class="flex items-center justify-center w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition shadow-lg">
-                                <i class="fa-solid fa-table-list mr-3"></i>Launch Master Spreadsheet
-                            </a>
-                            <button onclick="refreshDashboard()" class="w-full py-4 border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-bold uppercase tracking-widest rounded-2xl transition cursor-pointer flex items-center justify-center">
-                                <i class="fa-solid fa-rotate mr-2"></i>Refresh Dashboard Data
+
+                        <div class="space-y-3">
+                            <button onclick="runBackendDiagnostic()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider rounded-2xl transition shadow-md flex items-center justify-center cursor-pointer">
+                                <i class="fa-solid fa-network-wired mr-2"></i>Test Backend Connection Now
                             </button>
+                            <a href="https://docs.google.com/spreadsheets/d/1kCZCztLyBNZLCGeBhjOBZa5ivftEsCr4In0d1V4yjNg/edit?usp=sharing" target="_blank" class="flex items-center justify-center w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-2xl transition shadow-lg">
+                                <i class="fa-solid fa-table-list mr-2"></i>Launch Master Google Sheet
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -423,95 +435,55 @@
         // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE INSIDE THE QUOTES
         const GOOGLE_SCRIPT_URL = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE";
 
-        const RMHS_LOC = [42.5255, -71.1095];
-        let map, chart;
-        let partnerGeoJsonLayer;
+        // Check URL status on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkScriptUrlStatus();
+        });
 
-        // Fallback GIS sample data for Reading, MA partners
-        const fallbackPartners = {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": { "id": "PRT-001", "name": "Reading Health System", "industry": "Careers in Allied Health", "type": "Internship Host" },
-                    "geometry": { "type": "Point", "coordinates": [-71.1050, 42.5280] }
-                },
-                {
-                    "type": "Feature",
-                    "properties": { "id": "PRT-002", "name": "Reading Engineering Lab", "industry": "Engineering / Advanced Manufacturing", "type": "Capstone Host" },
-                    "geometry": { "type": "Point", "coordinates": [-71.1120, 42.5180] }
-                },
-                {
-                    "type": "Feature",
-                    "properties": { "id": "PRT-003", "name": "North Shore Tech Solutions", "industry": "Computer Science / IT", "type": "Advisory Board" },
-                    "geometry": { "type": "Point", "coordinates": [-71.0980, 42.5320] }
-                },
-                {
-                    "type": "Feature",
-                    "properties": { "id": "PRT-004", "name": "Reading Public Health Dept", "industry": "Public Health", "type": "Job Shadow" },
-                    "geometry": { "type": "Point", "coordinates": [-71.1065, 42.5240] }
-                },
-                {
-                    "type": "Feature",
-                    "properties": { "id": "PRT-005", "name": "Reading Cooperative Bank", "industry": "Business / Finance", "type": "Career Day" },
-                    "geometry": { "type": "Point", "coordinates": [-71.1088, 42.5262] }
-                }
-            ]
-        };
+        function checkScriptUrlStatus() {
+            const badge = document.getElementById('script-url-badge');
+            if (!badge) return;
 
-        const industryData = {
-            'Careers in Allied Health': 12,
-            'Engineering / Advanced Manufacturing': 19,
-            'Computer Science / IT': 8,
-            'Business / Finance': 15,
-            'Public Health': 7,
-            'Digital Media / Marketing': 10
-        };
-
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById('btn-' + id).classList.add('active');
-            
-            if (id === 'gis') {
-                setTimeout(initMap, 150);
-            }
-            if (id === 'admin') {
-                checkAdminAuth();
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE")) {
+                badge.className = "px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-red-500/20 text-red-400 border border-red-500/30";
+                badge.innerText = "NOT CONFIGURED";
+            } else if (GOOGLE_SCRIPT_URL.startsWith("https://script.google.com/macros/s/")) {
+                badge.className = "px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                badge.innerText = "CONFIGURED";
+            } else {
+                badge.className = "px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+                badge.innerText = "INVALID URL FORMAT";
             }
         }
 
-        function initMap() {
-            if (map) {
-                map.invalidateSize();
+        function runBackendDiagnostic() {
+            const output = document.getElementById('diagnostic-output');
+            output.innerHTML = "⌛ Pinging Google Apps Script backend...";
+
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE")) {
+                output.innerHTML = "❌ <strong class='text-red-400'>Error:</strong> GOOGLE_SCRIPT_URL is still placeholder text. Please replace it in index.html with your active Web App URL ending in /exec.";
                 return;
             }
-            map = L.map('map').setView(RMHS_LOC, 13);
-            
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            }).addTo(map);
 
-            // RMHS Central Hub Marker
-            L.circleMarker(RMHS_LOC, {
-                radius: 10,
-                fillColor: "#C8102E",
-                color: "#ffffff",
-                weight: 3,
-                opacity: 1,
-                fillOpacity: 1
-            }).addTo(map).bindPopup("<div class='p-1'><b class='rocket-text text-sm'>RMHS Central Hub</b><br><span class='text-xs text-slate-600'>62 Oakland Rd, Reading, MA 01867</span></div>");
+            const testParams = new URLSearchParams();
+            testParams.append('contactName', 'Diagnostic System Ping');
+            testParams.append('orgName', 'RMHS Diagnostic Suite');
+            testParams.append('industry', 'Computer Science / IT');
+            testParams.append('address', '62 Oakland Rd, Reading, MA 01867');
+            testParams.append('type', 'Diagnostic Check');
+            testParams.append('isTest', 'true');
 
-            fetch('rmhs_wbl_partners.geojson')
-                .then(r => {
-                    if (!r.ok) throw new Error("GeoJSON HTTP error");
-                    return r.json();
-                })
-                .then(data => renderGeoJsonData(data))
-                .catch(() => {
-                    renderGeoJsonData(fallbackPartners);
-                });
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: testParams,
+                mode: 'no-cors'
+            })
+            .then(() => {
+                output.innerHTML = "✅ <strong class='text-emerald-400'>Request Sent!</strong> Check your Google Sheet tab 'Debug_Logs' or main sheet. If a new row appears, synchronization is 100% active!";
+            })
+            .catch(err => {
+                output.innerHTML = "❌ <strong class='text-red-400'>Network Error:</strong> " + err.toString();
+            });
         }
 
         function renderGeoJsonData(geoData) {
@@ -596,15 +568,17 @@
             const industry = formData.get('industry') || 'Careers in Allied Health';
             const selectedTypes = formData.getAll('type').join(', ') || 'General Collaboration';
 
+            // Check if URL is placeholder
+            const isPlaceholder = !GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE");
+
             // Convert FormData to URLSearchParams (application/x-www-form-urlencoded)
-            // so that Google Apps Script `e.parameter` parses the values natively!
             const urlParams = new URLSearchParams();
             for (const [key, value] of formData.entries()) {
                 urlParams.append(key, value);
             }
 
-            // Send to Google Sheets Web App if URL is provided
-            if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE") {
+            // Send to Google Sheets Web App
+            if (!isPlaceholder) {
                 fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     body: urlParams,
@@ -636,13 +610,23 @@
             // Display confirmation modal
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            
+            let statusNotice = isPlaceholder ? 
+                `<div class="p-3 mb-4 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl text-left">
+                    <strong>⚠️ Setup Notice:</strong> Your submission was simulated locally because <code>GOOGLE_SCRIPT_URL</code> is not configured yet in GitHub.
+                 </div>` : 
+                `<div class="p-3 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl text-left">
+                    <strong>✅ Synchronized:</strong> Request transmitted directly to your Google Sheet!
+                 </div>`;
+
             modal.innerHTML = `
                 <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
                     <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
                     <h3 class="text-2xl font-black text-slate-900 mb-2">Submission Received!</h3>
-                    <p class="text-sm text-slate-600 mb-6">Thank you, <strong>${contactName}</strong>! Your partner inquiry for <strong>${orgName}</strong> has been logged for Reading Memorial High School. Our Work-Based Learning team will reach out shortly.</p>
+                    <p class="text-sm text-slate-600 mb-4">Thank you, <strong>${contactName}</strong>! Your partner inquiry for <strong>${orgName}</strong> has been logged for Reading Memorial High School.</p>
+                    ${statusNotice}
                     <button id="closeModal" class="w-full py-3.5 rocket-red text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition cursor-pointer">View Partner Directory</button>
                 </div>
             `;
@@ -660,10 +644,3 @@
     </script>
 </body>
 </html>
-```
-
-### Next Action:
-1. Copy the updated `index.html` code above into your GitHub repository (`Community-Partner-Intake`).
-2. Ensure line 282 is updated with your live Web App URL (`const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/.../exec";`).
-3. Commit changes to `main`. 
-4. Run another live test! The submission will now show up directly in your Google Sheet.
